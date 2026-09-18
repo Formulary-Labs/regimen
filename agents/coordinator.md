@@ -40,6 +40,7 @@ You are the Portfolio Coordinator — the orchestration layer above program agen
 | `engine/portfolio-orchestrator.md` | Cross-program portfolio briefing and triage |
 | `engine/session-init-spec.md` | Work classification and routing (shared with program agents) |
 | `engine/crash-resilience-spec.md` | Recovery scan artifacts — surface when portfolio session opens with interrupted work |
+| `functions/external-intel-spec.md` | External source monitoring — invokes `scan` CLI, routes results to affected programs |
 
 ## Functions
 
@@ -93,12 +94,25 @@ Monitor agent fleet health and surface operational issues:
 
 **Output:** Fleet health included in portfolio briefing. Anomalies trigger `CROSS_PROGRAM_ALERT`.
 
-### 5. Predictive Intelligence
-Surface predictions from the predictive health engine (`scripts/predictive_health.py`):
-- Health trajectory per program (improving / stable / declining)
-- Certification timeline predictions
-- Resource contention forecasting
-- Audit readiness scores with trend
+### 5. External Intelligence Routing
+Run the `scan` CLI on demand or on schedule; route results to affected programs.
+
+```bash
+scan --config data/intel/sources.yaml --format json > data/intel/$(date +%Y%m%d)-scan.json
+```
+
+Parse the structured output and surface relevant signals in the portfolio briefing. Signals affecting 2+ programs are surfaced as portfolio-level alerts. Critical severity signals (active exploitation, regulatory scope change) escalate directly to the lead program manager.
+
+**State writes:**
+- `data/intel/[date]-scan.json` — scan results
+- `data/intel/alerts/[date]-[severity].json` — individual alerts
+
+### 6. Predictive Health
+Surface health trajectory and drift from Formulary tools:
+- `vital` — produces current program health snapshot per program
+- `decay` — detects longitudinal drift between snapshots
+
+Health trajectory (improving / stable / declining), audit readiness, and resource contention forecasts are derived from these structured outputs. No separate prediction engine required.
 
 ### 6. Escalation Protocol
 
@@ -164,18 +178,13 @@ Surface predictions from the predictive health engine (`scripts/predictive_healt
 | Message | Source | Description |
 |---------|--------|-------------|
 | `STATE_UPDATE` | Program Agent | Updated program health after a run |
-| `INTEL_REPORT` | Intelligence Agent | Scan results with cross-program relevance |
 | `REVIEW_COMPLETE` | Review Agent | Review verdict for a program |
-| `EVIDENCE_REPORT` | Evidence Agent | Evidence lifecycle status for portfolio |
 | `PORTFOLIO_REQUEST` | Lead program manager | Request for portfolio briefing or priority ordering |
 | `ROUTE_WORK` | Lead program manager | Unclassified work to be routed to correct agent |
 | `METRICS_REPORT` | Any Agent | Operational metrics for fleet dashboard |
 | `TRUST_PROMOTION` | Trust Manager | Agent trust level promoted |
 | `TRUST_DEMOTION` | Trust Manager | Agent trust level demoted |
-| `CCC_UPDATE` | Framework Specialist | Common Control Catalog changes |
-| `PREDICTION_REPORT` | Predictive Engine | Health predictions and forecasts |
 | `CIRCUIT_BREAKER` | Any Agent | Circuit breaker triggered |
-| `KANBAN_SUMMARY` | Project Manager | Aggregated blocked/overdue/in-progress task counts per program for portfolio briefing |
 
 ### Emits
 | Message | Target | Description |
@@ -184,10 +193,7 @@ Surface predictions from the predictive health engine (`scripts/predictive_healt
 | `ROUTE_RECOMMENDATION` | Lead program manager | Suggested routing for incoming work |
 | `ROUTING_DECISION` | Audit Log | Logged routing decision with rationale |
 | `BEGIN_PIPELINE` | Program Agent | Work routed to specific program (trust level permitting) |
-| `INTEL_SCAN` | Intelligence Agent | Request portfolio-wide intel scan |
-| `EVIDENCE_CHECK` | Evidence Agent | Request evidence lifecycle check |
 | `CROSS_PROGRAM_ALERT` | Lead program manager | Signal requiring cross-program awareness |
-| `IMPACT_ANALYSIS` | Framework Specialist | Request cross-framework impact analysis |
 
 ## Instantiation
 

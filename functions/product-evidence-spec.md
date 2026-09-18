@@ -1,6 +1,6 @@
 ---
 resource_type: spec
-version: "1.1"
+version: "2.0"
 domain: compliance
 triggers:
   - product_onboarding
@@ -28,13 +28,12 @@ depends_on:
   - functions/control-coverage-spec.md
 structured_output: true
 structured_output_schema: config/schemas/run-output-v2.schema.json
-
 ---
 
 # Product Evidence Spec
 
-**Version:** 1.1
-**Purpose:** Extract ISO 42001-relevant signals from a product's source repository and available materials. Produce a product profile, an annotated Annex A control matrix, and an evidence gap list that feeds the AIMS pipeline — enabling evidence-building before product team contact. Designed for the 5-empty-product-folder problem: generate a meaningful stub from what exists publicly or internally before pinging engineering.
+**Version:** 2.0
+**Purpose:** Extract framework-relevant compliance signals from a product's source repository and available materials. Produce a product profile, an annotated control matrix, and an evidence gap list — enabling evidence-building before product team contact. Designed for the empty-product-folder problem: generate a meaningful stub from what exists publicly or internally before pinging engineering.
 **Governed by:** `config/constitution.md`
 
 ---
@@ -47,13 +46,11 @@ structured_output_schema: config/schemas/run-output-v2.schema.json
 
 ## Persona Definition
 
-Senior compliance analyst extracting ISO 42001 evidence signals from engineering artifacts. Distinguish between what the repo *demonstrates* (implementation exists), what it *claims* (documented intent), and what it *cannot tell us* (requires product team). No credit for intent stated only in documentation without implementation signals. Flag gaps without softening.
+Senior compliance analyst extracting evidence signals from engineering artifacts. Distinguish between what the repo *demonstrates* (implementation exists), what it *claims* (documented intent), and what it *cannot tell us* (requires product team). No credit for intent stated only in documentation without implementation signals. Flag gaps without softening.
 
 ---
 
 ## Confidence Vocabulary
-
-Use these tags throughout all outputs from this spec:
 
 | Tag | Meaning |
 |---|---|
@@ -75,7 +72,7 @@ Inherit from `functions/control-coverage-spec.md`:
 | Evidenced | ✓ | Formal artifact exists and demonstrates implementation |
 | Implemented — no evidence | ~ | Implementation observable in repo signals; no formal audit artifact |
 | Gap | ✗ | Not implemented or no information available |
-| Not applicable | N/A | Explicitly scoped out or not relevant to this product's AI profile |
+| Not applicable | N/A | Explicitly scoped out or not relevant to this product |
 
 **Important:** Repo README signals alone never produce `✓`. Maximum confidence from repo scan is `~`. Only formal artifacts (published system cards, audit reports, signed policies, independent test results) produce `✓`.
 
@@ -84,11 +81,11 @@ Inherit from `functions/control-coverage-spec.md`:
 ## Parameters
 
 ```
-PRODUCT_NAME:     [product name as it appears in the AIMS charter]
-PROGRAM_SLUG:     [e.g., iso42001]
+PRODUCT_NAME:     [product name as it appears in the program charter]
+PROGRAM_SLUG:     [e.g., iso27001, fedramp-high]
+FRAMEWORK:        [e.g., ISO/IEC 42001:2023, NIST SP 800-53 Rev 5, SOC 2 TSC]
 REPO_URLS:        [list of repo URLs scanned]
-FRAMEWORK:        ISO/IEC 42001:2023
-ANNEX_A_SUBSET:   [list of control IDs applicable to this product — default: all Annex A]
+CONTROL_SUBSET:   [list of control IDs applicable to this product — default: all controls in program scope]
 SCAN_DATE:        [YYYY-MM-DD]
 ANALYST:          [agent | name]
 ```
@@ -99,22 +96,22 @@ ANALYST:          [agent | name]
 
 ### Pass 1 — Product Classification
 
-Identify the product's AI system type from repo materials. Use the ISO 42001:2023 Annex B / Annex C taxonomy as the reference. Record:
+Identify the product's system type from repo materials using the target framework's taxonomy or classification guidance (load from gemara Layer 1 for this program). Record:
 
 1. **Primary function** — what the system does for users
-2. **AI system type** — generative assistant, RAG-augmented system, inference infrastructure, evaluation tooling, safety layer, or combination
+2. **System type** — as defined by the target framework's product classification
 3. **Deployment context** — SaaS, on-prem, embedded library, API service, container workload
-4. **Foundational role** — does this product serve as infrastructure for other products in the AIMS scope? If yes, note which products depend on it.
-5. **Third-party model dependency** — which foundation models or LLM providers does the product use? Are they upstream third parties per A.10.3?
+4. **Foundational role** — does this product serve as infrastructure for other products in the program scope? If yes, note which products depend on it.
+5. **Third-party dependencies** — which external services, vendors, or providers does the product use that may be in scope for the framework?
 
 Narrate:
 
 ```
 [PRODUCT-EVIDENCE] Product: [name]
-[PRODUCT-EVIDENCE] AI system type: [type]
+[PRODUCT-EVIDENCE] System type: [type per framework classification]
 [PRODUCT-EVIDENCE] Deployment context: [context]
 [PRODUCT-EVIDENCE] Foundational dependency role: [yes/no — which products depend on this]
-[PRODUCT-EVIDENCE] Third-party models: [list]
+[PRODUCT-EVIDENCE] Third-party dependencies in scope: [list]
 [PRODUCT-EVIDENCE] Pass 1 complete. Beginning repo signal extraction...
 ```
 
@@ -122,31 +119,10 @@ Narrate:
 
 ### Pass 2 — Repo Signal Extraction
 
-Scan all provided repo URLs. For each repo, extract signals relevant to ISO 42001 Annex A control families. Process in order:
-
-**A.4 — Resources for AI systems**
-Look for: LLM provider configurations, model registries, embedding model specifications, compute resource documentation, dependency management files.
-
-**A.5 — Assessing impacts of AI systems**
-Look for: Impact assessment documents, risk documentation, bias testing references, fairness evaluation pipelines, model card references.
-
-**A.6 — AI system life cycle**
-Look for: Architecture documentation, CI/CD pipelines, container build configs, versioning schemes, test suites (unit, integration, e2e), deployment configs, API specifications, change management processes.
-
-**A.7 — Data for AI systems**
-Look for: Data collection configurations, data export integrations, data provenance tracking, vector database generation, dataset management, privacy controls on data collection.
-
-**A.8 — Information for interested parties**
-Look for: Published API specifications, system cards, model cards, transparency documentation, evaluation results, performance metrics, health endpoints.
-
-**A.9 — Use of AI systems**
-Look for: Safety shields, content filtering, input validation, output filtering, PII redaction, topic restriction, system prompt controls, human-in-the-loop mechanisms, authorization controls.
-
-**A.10 — Third-party and customer relationships**
-Look for: Third-party API integration patterns, authentication mechanisms for external services, supplier dependency management, customer-facing transparency artifacts.
+Load the target framework's control catalog from the gemara Layer 1 artifact for this program (`data/[PROGRAM]/gemara/[framework]-layer1.yaml` or equivalent). For each control family in the applicable subset, scan all provided repo URLs and extract signals relevant to that family.
 
 For each signal found, record:
-- Control ID it maps to
+- Control ID it maps to (from the gemara catalog — trust the catalog, not prior narrative)
 - Repository source and specific location (README section, config file, doc page)
 - What it demonstrates (not what it claims)
 - Confidence tag
@@ -155,8 +131,7 @@ Narrate progress:
 
 ```
 [PRODUCT-EVIDENCE] Scanning [repo-name]...
-[PRODUCT-EVIDENCE] A.6 signals found: [n] — [brief description]
-[PRODUCT-EVIDENCE] A.7 signals found: [n] — [brief description]
+[PRODUCT-EVIDENCE] [Family/Domain] signals found: [n] — [brief description]
 ...
 ```
 
@@ -164,10 +139,10 @@ Narrate progress:
 
 ### Pass 3 — Control Matrix Assembly
 
-Produce the Annex A control matrix at the control level (not family level) for the applicable subset. Use the control-level matrix format from `functions/control-coverage-spec.md`:
+Produce the control matrix at the individual control level for the applicable subset:
 
 ```
-## Product Control Matrix — ISO/IEC 42001:2023 Annex A
+## Product Control Matrix — [FRAMEWORK]
 Product: [PRODUCT_NAME]
 Scan date: [DATE]
 Repos scanned: [list]
@@ -175,10 +150,9 @@ Materials basis: Repo READMEs, architecture docs, CI/CD configs, published API s
 
 | Control ID | Control Name | Status | Evidence / Signal | Source | Notes |
 |---|---|---|---|---|---|
-| A.4.2 | Data for AI systems | ~ | Embedding model spec in rag-content README | github.com/lightspeed-core/rag-content | [REPO SIGNAL] |
 ```
 
-Status rationale column is required for any control classified `✗` (explain why there is no signal) and any `N/A` (explain scope exclusion).
+Status rationale column required for any `✗` (explain why there is no signal) and any `N/A` (explain scope exclusion).
 
 After the matrix, summarize:
 
@@ -193,8 +167,6 @@ After the matrix, summarize:
 
 ### Pass 4 — Evidence Gap Analysis
 
-Produce three focused outputs:
-
 **1. Formal artifact gaps** — controls at `~` that need a formal artifact to reach `✓`:
 
 ```
@@ -207,11 +179,11 @@ Controls currently Implemented-no-evidence. Formal artifacts needed for audit re
 
 Priority: High = auditor will sample this; Medium = may be sampled; Low = administrative, low audit visibility.
 
-**2. Data needed from product team** — controls at `✗` where the signal simply isn't in the repo:
+**2. Data needed from product team** — controls at `✗` where signal is not in the repo:
 
 ```
 ## Data Needed from Product Team
-Controls with no repo signal. Questions for the product team engineering or PM contact.
+Controls with no repo signal. Questions for the product team.
 
 | Control ID | Control Name | Question for product team | Why it matters |
 |---|---|---|---|
@@ -231,12 +203,12 @@ Controls or functions with no identified owner from repo materials.
 
 ### Pass 5 — Product Profile Assembly
 
-Produce `data/ISO42001/[product]/product-profile.md` with these sections:
+Produce `data/[PROGRAM]/products/[product-slug]/product-profile.md` with these sections:
 
 1. **Product Summary** — one-paragraph plain-language description for an auditor unfamiliar with the product
-2. **AI System Classification** — type, deployment context, foundational role
-3. **Architecture Overview** — key components, external dependencies, LLM providers, data flows (narrative, not diagram)
-4. **ISO 42001 Applicability Notes** — which Annex A controls are most relevant, which are inherited from enterprise AIMS policies vs. product-specific implementations
+2. **System Classification** — type, deployment context, foundational role
+3. **Architecture Overview** — key components, external dependencies, data flows (narrative)
+4. **Framework Applicability Notes** — which controls are most relevant, which are inherited from program-level policies vs. product-specific
 5. **Known Evidence Artifacts** — list of any formal artifacts found or referenced in repo materials
 6. **Open Questions** — explicit list of items requiring product team input before audit prep
 7. **Repo Sources** — list of repos scanned with last-updated dates
@@ -245,7 +217,7 @@ Produce `data/ISO42001/[product]/product-profile.md` with these sections:
 
 ### Pass 6 — Run JSON Write
 
-After Pass 5, if a program run JSON exists, write the product data stub. Append to the program's `runs/[PROGRAM]/latest.json` under a `products` array (create the key if absent):
+After Pass 5, append to the program's `runs/[PROGRAM]/latest.json` under a `products` array (create the key if absent):
 
 ```json
 "products": [
@@ -256,13 +228,13 @@ After Pass 5, if a program run JSON exists, write the product data stub. Append 
     "scan_date": "YYYY-MM-DD",
     "repos_scanned": ["url1", "url2"],
     "system_owner": "[name or OWNER NEEDED]",
-    "ai_system_type": "[type]",
+    "system_type": "[type per framework classification]",
     "deployment_context": "[context]",
     "foundational_for": ["product1", "product2"],
-    "control_matrix_path": "data/ISO42001/[product]/control-matrix.md",
-    "product_profile_path": "data/ISO42001/[product]/product-profile.md",
-    "evidence_gaps_path": "data/ISO42001/[product]/evidence-gaps.md",
-    "annex_a_summary": {
+    "control_matrix_path": "data/[PROGRAM]/products/[product-slug]/control-matrix.md",
+    "product_profile_path": "data/[PROGRAM]/products/[product-slug]/product-profile.md",
+    "evidence_gaps_path": "data/[PROGRAM]/products/[product-slug]/evidence-gaps.md",
+    "control_summary": {
       "total_controls_assessed": 0,
       "implemented_no_evidence": 0,
       "gap": 0,
@@ -274,44 +246,17 @@ After Pass 5, if a program run JSON exists, write the product data stub. Append 
 ]
 ```
 
-Narrate at completion:
-
-```
-[PRODUCT-EVIDENCE] Product stub written to runs/[PROGRAM]/latest.json
-[PRODUCT-EVIDENCE] Handing off to provenance log...
-```
-
 ---
 
 ## Provenance
 
-Run once per output file — the script accepts one `--output` per call:
-
 ```bash
 python3 scripts/provenance_log.py write \
   --spec "functions/product-evidence-spec.md" \
-  --output "data/ISO42001/[PRODUCT]/product-profile.md" \
+  --output "data/[PROGRAM]/products/[product-slug]/product-profile.md" \
   --output-type product_evidence \
   --program "[PROGRAM]" \
   --purpose "Product evidence extraction: [PRODUCT] — [n] controls | repo scan | [n] gaps" \
-  --reusability artifact \
-  --quality-gate pass
-
-python3 scripts/provenance_log.py write \
-  --spec "functions/product-evidence-spec.md" \
-  --output "data/ISO42001/[PRODUCT]/control-matrix.md" \
-  --output-type product_evidence \
-  --program "[PROGRAM]" \
-  --purpose "Product control matrix: [PRODUCT] — [n] controls | [x]% coverage | [n] gaps" \
-  --reusability artifact \
-  --quality-gate pass
-
-python3 scripts/provenance_log.py write \
-  --spec "functions/product-evidence-spec.md" \
-  --output "data/ISO42001/[PRODUCT]/evidence-gaps.md" \
-  --output-type product_evidence \
-  --program "[PROGRAM]" \
-  --purpose "Evidence gap analysis: [PRODUCT] — [n] formal artifact gaps | [n] product team items" \
   --reusability artifact \
   --quality-gate pass
 ```
@@ -336,5 +281,5 @@ Invoke `engine/quality-gate-spec.md`. Spec-specific REJECT triggers:
 - Governed by: `config/constitution.md`
 - Feeds: `functions/control-coverage-spec.md` (program-level rollup), `functions/risk-register-spec.md`
 - Reads: Repo materials (public), `runs/[PROGRAM]/latest.json`
-- Writes: `data/ISO42001/[PRODUCT]/`, `runs/[PROGRAM]/latest.json → products[]`
-- Logged by: `scripts/provenance_log.py` — output_type: `artifact`
+- Writes: `data/[PROGRAM]/products/[product-slug]/`, `runs/[PROGRAM]/latest.json → products[]`
+- Logged by: `scripts/provenance_log.py` — output_type: `product_evidence`
