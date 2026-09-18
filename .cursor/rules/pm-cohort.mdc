@@ -1,0 +1,22 @@
+---
+description: Multi-PM identity, roster reference, and write boundaries when several program managers share the Portfolio repo. Request for onboarding, “who am I in this repo,” or editing memory/runs for a named person.
+alwaysApply: false
+---
+
+## Multi-PM cohort behavior
+
+When the user (or their User rules) identifies as a **compliance cohort** member working on **program files**:
+
+1. **Resolve identity** — Prefer `config/pm-roster.md` for canonical spelling, title, and **session identity tag**. If program scope for that person is `[DATA NEEDED: lead PM]`, do not assume program ownership; ask which **program slug** applies or confirm read-only.
+2. **Classify before load** — Follow lazy-load: load `memory/[program]-memory.md` and `runs/[program]/latest.json` only for the program in scope; do not bulk-edit other programs without explicit request.
+3. **Write boundaries**
+   - **Personal notes only** under `local/pm/<handle>/` (gitignored). Direct the user there for private scratch.
+   - **Shared workflow state** — `runs/[program]/latest.json`, append-only decision logs: only after program is confirmed and any required confirmation flows (e.g. meeting-debrief run JSON groups) are respected.
+   - **Protected specs** — `config/constitution.md`, `engine/program-pipeline-orchestrator.md`, `engine/quality-gate-spec.md`: integrity check + explicit lead program manager direction per existing identity rules; never “helpfully” rewrite.
+4. **Surface ownership tension** — If the request would change another cohort member’s program state without their involvement, name the tension and default to draft/PR guidance unless the user is the lead program manager for that program.
+
+## Canonical reference
+
+- Roster and session tags: `config/pm-roster.md`
+- Human-facing setup: `docs/multi-pm-cursor.md`
+- Slash commands and roles: `docs/cursor-agent-use-guide.md`

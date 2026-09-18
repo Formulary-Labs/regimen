@@ -1,0 +1,30 @@
+---
+description: Available slash commands and what each does. Request when the user asks what commands exist, or references a /command-name not yet loaded.
+alwaysApply: false
+---
+
+## Available Commands
+
+Each command reads and executes its canonical spec from `commands/[name].md`. In Cursor, invoke via the matching skill in `.cursor/skills/[name]/SKILL.md`.
+
+| Command | What it does |
+|---|---|
+| `/init` | Session initialization — constitution load, directory discovery, classify or orient, route |
+| `/daily-brief` | Morning briefing across all active programs: health, due items, decisions, blockers |
+| `/program-status` | One-page status snapshot for a single program |
+| `/due-this-week` | Cross-program digest of items due or overdue in the next seven days |
+| `/evidence-due` | Upcoming and overdue evidence collection windows for a program |
+| `/kanban` | View, update, and manage per-program kanban boards; Jira import support |
+| `/log-decision` | Capture a decision into the program decision log and provenance |
+| `/meeting-debrief` | Ingest a meeting transcript; extract decisions and actions; update program state |
+| `/meeting-prep` | Focused briefing for a 1:1 or team sync, filtered by owner and program |
+| `/draft-status-update` | Draft a stakeholder communication calibrated by audience |
+| `/control-assessment` | Fill auditor templates, STIGs, or benchmarks from framework and product docs |
+| `/intel-scan` | External intelligence monitoring: source scan, relevance scoring, risk deltas |
+| `/portfolio-qbr` | Quarterly narrative synthesis across all programs: trajectory, cross-program patterns, forward priorities |
+| `/auditor-view` | Read-only auditor compliance posture dashboard as static HTML |
+| `/provenance-query` | Query the provenance log for what was produced for a program |
+| `/update-item` | Update status, owner, or notes on a POA&M or GRC item by ID |
+| `/doc-review` | Two-tier language scan for AI writing tells and format standards on a document |
+| `/post-audit` | Lessons learned, corrective actions, and feed-forward artifact from a closed audit |
+| `/validate` | Run the system's structural validators (frontmatter, schema drift, spec coverage, integrity) in one pass |

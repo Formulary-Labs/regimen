@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "post-audit-feed-forward.schema.json",
+  "title": "Post-Audit Feed-Forward Artifact",
+  "description": "Structured output from functions/post-audit-spec.md (full_retrospective mode) written to data/[PROGRAM]/post-audit/[AUDIT_CYCLE]-feed-forward.json. Consumed by functions/program-intake-spec.md on PROGRAM_TYPE: existing_transition runs and by functions/compliance-entropy-spec.md as structured AUDIT_REPORTS input. Captures audit findings, corrective actions, systemic patterns, and improvement recommendations for forward propagation into the next compliance cycle.",
+  "type": "object",
+  "required": ["schema_version", "spec", "program", "audit_type", "audit_cycle", "produced_date", "findings_summary"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "spec": { "type": "string", "const": "functions/post-audit-spec.md" },
+    "program": { "type": "string" },
+    "audit_type": { "type": "string", "enum": ["external", "surveillance", "internal"] },
+    "audit_cycle": { "type": "string", "description": "YYYY or YYYY-MM-DD range" },
+    "produced_date": { "type": "string", "format": "date" },
+    "findings_summary": {
+      "type": "object",
+      "required": ["total", "by_severity", "by_disposition"],
+      "properties": {
+        "total": { "type": "integer" },
+        "by_severity": {
+          "type": "object",
+          "properties": {
+            "critical": { "type": "integer" },
+            "high": { "type": "integer" },
+            "medium": { "type": "integer" },
+            "low": { "type": "integer" }
+          }
+        },
+        "by_disposition": {
+          "type": "object",
+          "properties": {
+            "closed": { "type": "integer" },
+            "open": { "type": "integer" },
+            "contested": { "type": "integer" }
+          }
+        },
+        "non_durable_remediation_count": { "type": "integer" },
+        "recurrence_count": { "type": "integer" }
+      }
+    },
+    "control_families_affected": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "corrective_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ca_id": { "type": "string" },
+          "source_finding": { "type": "string" },
+          "control_family": { "type": "string" },
+          "priority": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+          "owner": { "type": "string" },
+          "target_date": { "type": "string", "format": "date" },
+          "status": { "type": "string", "enum": ["open", "in_progress", "closed", "accepted", "deferred"] }
+        }
+      }
+    },
+    "systemic_patterns": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "improvement_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": { "type": "string", "enum": ["process", "documentation", "tooling", "ownership", "audit_surface"] },
+          "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+          "title": { "type": "string" },
+          "suggested_owner": { "type": "string" },
+          "suggested_timeline": { "type": "string", "enum": ["this_cycle", "next_cycle", "ongoing"] }
+        }
+      }
+    },
+    "flags": {
+      "type": "object",
+      "properties": {
+        "owner_needed": { "type": "array", "items": { "type": "string" } },
+        "date_needed": { "type": "array", "items": { "type": "string" } },
+        "non_durable_remediation": { "type": "array", "items": { "type": "string" } },
+        "data_needed": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "lessons_learned_report": { "type": "string" },
+        "corrective_action_plan": { "type": "string" },
+        "program_improvement_items": { "type": "string" }
+      }
+    }
+  }
+}

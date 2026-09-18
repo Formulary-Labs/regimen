@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qbr-output.schema.json",
+  "title": "Portfolio QBR Output",
+  "description": "Structured shape of the quarterly business review produced by engine/portfolio-qbr-spec.md. The spec's canonical output is the markdown narrative written to data/portfolio/qbr/[date]-qbr.md — this schema declares the same content structurally so a future OUTPUT_FORMAT: json/both mode, or downstream tooling, can consume it without re-parsing prose. Structural completeness does not replace the spec's synthesis quality-gate requirements (engine/quality-gate-spec.md) — a JSON emission must satisfy the same REJECT triggers as the markdown one.",
+  "type": "object",
+  "required": ["period_start", "period_end", "executive_summary", "per_program_narrative"],
+  "properties": {
+    "period_start": { "type": "string", "format": "date" },
+    "period_end": { "type": "string", "format": "date" },
+    "generated_at": { "type": "string", "format": "date" },
+    "programs_reviewed": { "type": "integer" },
+    "prior_qbr_date": { "type": ["string", "null"], "format": "date" },
+    "executive_summary": { "type": "string" },
+    "portfolio_health_trajectory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "program_slug": { "type": "string" },
+          "start_phase": { "type": "string" },
+          "end_phase": { "type": "string" },
+          "movement": { "type": "string", "enum": ["advancing", "holding", "stalled", "regressed"] },
+          "decisions_this_quarter": { "type": "integer" }
+        }
+      }
+    },
+    "per_program_narrative": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "program_slug": { "type": "string" },
+          "quarter_summary": { "type": "string" },
+          "phase_start": { "type": "string" },
+          "phase_end": { "type": "string" },
+          "movement": { "type": "string", "enum": ["advancing", "holding", "stalled", "regressed"] },
+          "key_decisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": { "type": "string", "format": "date" },
+                "description": { "type": "string" }
+              }
+            }
+          },
+          "patterns_noticed": { "type": "array", "items": { "type": "string" } },
+          "risks": {
+            "type": "object",
+            "properties": {
+              "materialized": { "type": "array", "items": { "type": "string" } },
+              "new": { "type": "array", "items": { "type": "string" } },
+              "resolved": { "type": "array", "items": { "type": "string" } },
+              "persistent": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "deferred_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "item": { "type": "string" },
+                "deferral_count": { "type": "integer" }
+              }
+            }
+          },
+          "forward_priority": { "type": "string" }
+        }
+      }
+    },
+    "cross_program_synthesis": {
+      "type": "object",
+      "properties": {
+        "recurring_themes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "programs": { "type": "array", "items": { "type": "string" } },
+              "trajectory": { "type": "string", "enum": ["converging", "stable", "diverging"] }
+            }
+          }
+        },
+        "shared_vendor_exposure": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "vendor": { "type": "string" },
+              "programs": { "type": "array", "items": { "type": "string" } },
+              "risk_type": { "type": "string" },
+              "classification": { "type": "string", "enum": ["systemic", "coincidental"] }
+            }
+          }
+        },
+        "portfolio_level_risks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "evidence": { "type": "string" },
+              "inferred": { "type": "boolean", "default": false }
+            }
+          }
+        },
+        "ownership_concentration": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "owner": { "type": "string" },
+              "programs": { "type": "array", "items": { "type": "string" } },
+              "fragility_assessment": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "forward_look": {
+      "type": "array",
+      "description": "Ranked priorities for the next quarter.",
+      "items": { "type": "string" }
+    },
+    "what_changed_since_prior": {
+      "type": ["object", "null"],
+      "properties": {
+        "prior_period": { "type": "string" },
+        "prior_priority_assessment": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "priority": { "type": "string" },
+              "status": { "type": "string", "enum": ["addressed", "partially_addressed", "carried_forward", "no_longer_relevant"] }
+            }
+          }
+        },
+        "new_themes": { "type": "array", "items": { "type": "string" } },
+        "resolved_themes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# Cursor Agent Configuration
+# Repo root: .cursorrules
+
+This file is a pointer only — canonical content lives in `.cursor/rules/` to avoid loading the same instructions twice every session.
+
+- Identity, core rules, flag vocabulary: `.cursor/rules/identity.mdc` (alwaysApply: true)
+- Boot sequence, lazy-load routing table: `.cursor/rules/lazy-load.mdc` (alwaysApply: true)
+- Path conventions, memory/run file naming: `.cursor/rules/path-conventions.mdc` (agent-requestable)
+- Tool build requirements: `.cursor/rules/tool-build.mdc` (agent-requestable)
+- Multi-PM cohort behavior: `.cursor/rules/pm-cohort.mdc` (agent-requestable)
+
+Governed by `config/constitution.md` — load it first, always, before any action.

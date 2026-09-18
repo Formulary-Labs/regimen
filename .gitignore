@@ -1,0 +1,29 @@
+# Program-specific state — never commit
+data/*
+!data/.gitkeep
+runs/*
+!runs/.gitkeep
+logs/*
+!logs/.gitkeep
+drafts/*
+!drafts/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+.pytest_cache/
+*.log

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "briefing-output.schema.json",
+  "title": "Daily Brief Output",
+  "description": "Structured shape of the daily cross-program briefing produced by commands/daily-brief.md (.cursor/skills/daily-brief/SKILL.md). The command's canonical output is the prose format in commands/daily-brief.md — this schema exists so the same underlying data can optionally be emitted as JSON for agent-to-agent handoff, canvas rendering, or automation, without changing the human-readable default.",
+  "type": "object",
+  "required": ["generated_at", "portfolio_health"],
+  "properties": {
+    "generated_at": { "type": "string", "format": "date" },
+    "portfolio_health": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "program_slug": { "type": "string" },
+          "health": { "type": "string", "enum": ["red", "yellow", "green", "unknown"] },
+          "reason": { "type": "string", "description": "One-line reason, present if health is red or yellow" }
+        }
+      }
+    },
+    "due_today": { "type": "array", "items": { "$ref": "#/$defs/brief_item" } },
+    "due_this_week": { "type": "array", "items": { "$ref": "#/$defs/brief_item" } },
+    "decisions_pending": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/$defs/brief_item" },
+          { "properties": { "age_days": { "type": "integer" } } }
+        ]
+      }
+    },
+    "open_blockers": { "type": "array", "items": { "$ref": "#/$defs/brief_item" } },
+    "recent_activity": {
+      "type": "array",
+      "description": "Last 5 provenance entries, most recent first.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "format": "date" },
+          "output_type": { "type": "string" },
+          "program": { "type": "string" }
+        }
+      }
+    },
+    "suggested_first_action": {
+      "type": "string",
+      "description": "The single most urgent item across all programs."
+    }
+  },
+  "$defs": {
+    "brief_item": {
+      "type": "object",
+      "properties": {
+        "item": { "type": "string" },
+        "program": { "type": "string" },
+        "owner": { "type": "string" },
+        "due_date": { "type": "string", "format": "date" }
+      }
+    }
+  }
+}

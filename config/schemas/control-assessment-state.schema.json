@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "control-assessment-state.schema.json",
+  "title": "Control Assessment Batch State",
+  "description": "Resumability checkpoint for a single control-assessment run, written by functions/control-assessment-spec.md to data/[program]/assessments/[RUN_ID]-state.json.",
+  "type": "object",
+  "required": ["run_id", "program", "framework", "product_name", "status"],
+  "properties": {
+    "run_id": { "type": "string", "description": "YYYY-MM-DD-framework-product" },
+    "program": { "type": "string" },
+    "framework": { "type": "string" },
+    "product_name": { "type": "string" },
+    "product_version": { "type": "string" },
+    "template_path": { "type": "string" },
+    "product_source": { "type": "string" },
+    "started": { "type": "string", "format": "date-time" },
+    "last_updated": { "type": "string", "format": "date-time" },
+    "status": { "type": "string", "enum": ["in_progress", "complete", "failed"] },
+    "template_type": { "type": "string" },
+    "field_map": { "type": "object" },
+    "control_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "requirement_text": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "processing", "validated", "failed"] },
+          "batch": { "type": "integer" }
+        }
+      }
+    },
+    "product_index": {
+      "type": "object",
+      "properties": {
+        "sections": { "type": "array" },
+        "capabilities": { "type": "array" },
+        "indexed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "batches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "batch_number": { "type": "integer" },
+          "control_ids": { "type": "array", "items": { "type": "string" } },
+          "status": { "type": "string", "enum": ["pending", "complete", "failed"] },
+          "validated_at": { "type": "string", "format": "date-time" },
+          "validation_failures": { "type": "array" },
+          "responses": {
+            "type": "object",
+            "description": "Keyed by control ID.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "citation": { "type": "string" },
+                "narrative": { "type": "string" },
+                "determination": { "type": "string", "enum": ["satisfied", "partially_satisfied", "not_satisfied", "na"] },
+                "gap": { "type": ["string", "null"] },
+                "citation_confidence": { "type": "string", "enum": ["high", "medium", "low", "not_found"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "total_controls": { "type": "integer" },
+        "satisfied": { "type": "integer" },
+        "partially_satisfied": { "type": "integer" },
+        "not_satisfied": { "type": "integer" },
+        "na": { "type": "integer" },
+        "citation_not_found": { "type": "integer" },
+        "batches_complete": { "type": "integer" },
+        "batches_total": { "type": "integer" }
+      }
+    }
+  }
+}

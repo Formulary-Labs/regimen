@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "run-output-v2.schema.json",
+  "title": "Pipeline Run Output (v2.0, flat)",
+  "description": "Flat-structure run JSON written to runs/[PROGRAM]/latest.json by functions/program-intake-spec.md. This is a DIFFERENT, incompatible schema from run-output.schema.json (v1.1, nested run_manifest/program_state structure) used by engine/program-pipeline-orchestrator.md. Both schemas are in live use: iso42001 and hds run on v2.0 (this file); 62443 and customer-portal-ugc-sso run on v1.1. This split is a known structural debt item — see OPTIMIZATION-ROADMAP.md Phase 3 (schema version migration). New programs should use this v2.0 flat schema; do not introduce new v1.1 programs. Decision 2026-07-29 (see OPTIMIZATION-ROADMAP.md Phase 4): rather than force-fit every program's live content into a single rigid shape, this schema now formally documents three extension points (vendor_output, monitoring_output, program_extensions) so genuinely program-specific top-level content has a declared, discoverable home instead of being an undocumented ad-hoc field. Migrating existing 62443 / customer-portal-ugc-sso content into these fields is a separate, not-yet-executed follow-up — see the same roadmap section for why that migration itself carries data-loss risk on live audit programs and has not been done.",
+  "type": "object",
+  "required": ["schema_version", "program_name", "program_slug", "run_date", "phase", "overall_health"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "2.0" },
+    "program_name": { "type": "string" },
+    "program_slug": { "type": "string" },
+    "run_date": { "type": "string", "format": "date" },
+    "run_type": { "type": "string", "enum": ["intake", "full_build", "monitoring_run"] },
+    "program_type": { "type": "string", "enum": ["new", "existing_transition"] },
+    "phase": { "type": "string" },
+    "overall_health": { "type": "string", "enum": ["green", "yellow", "red", "unknown"] },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "mission": { "type": "string" },
+        "in_scope": { "type": "array", "items": { "type": "string" } },
+        "out_of_scope": { "type": "array", "items": { "type": "string" } },
+        "frameworks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "cert_target": { "type": "string" }
+            }
+          }
+        },
+        "workstreams": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "people": {
+      "type": "object",
+      "properties": {
+        "roster": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "role": { "type": "string" },
+              "org": { "type": "string" },
+              "owns": { "type": "array", "items": { "type": "string" } },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "ownership_gaps": { "type": "array" },
+        "stakeholder_notes": { "type": "string" }
+      }
+    },
+    "commitments": {
+      "type": "object",
+      "properties": {
+        "hard_deadlines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": { "type": "string" },
+              "date": { "type": "string", "format": "date" },
+              "owner": { "type": "string" },
+              "dependencies": { "type": "array" }
+            }
+          }
+        },
+        "soft_targets": { "type": "array" },
+        "recurring_obligations": { "type": "array" },
+        "effort_estimates": { "type": "array" }
+      }
+    },
+    "control_coverage": {
+      "type": "object",
+      "description": "Populated by full_build only; null on standard runs.",
+      "properties": {
+        "source": { "type": ["string", "null"] },
+        "framework": { "type": "string" },
+        "assessment_date": { "type": "string", "format": "date" },
+        "totals": {
+          "type": "object",
+          "properties": {
+            "total": { "type": "integer" },
+            "evidenced": { "type": "integer" },
+            "implemented_no_evidence": { "type": "integer" },
+            "gap": { "type": "integer" },
+            "not_applicable": { "type": "integer" }
+          }
+        },
+        "families": { "type": "array" }
+      }
+    },
+    "risk_register": {
+      "type": "object",
+      "description": "Populated by full_build only; null on standard runs.",
+      "properties": {
+        "source": { "type": ["string", "null"] },
+        "open": { "type": "object" },
+        "closed_period": { "type": "object" },
+        "overdue_poam": { "type": "object" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+              "status": { "type": "string", "enum": ["open", "in_progress", "closed", "accepted", "deferred"] },
+              "owner": { "type": "string" },
+              "target_date": { "type": "string", "format": "date" },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "evidence_calendar": {
+      "type": "object",
+      "description": "Populated by full_build only; null on standard runs.",
+      "properties": {
+        "source": { "type": ["string", "null"] },
+        "windows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "controls": { "type": "string" },
+              "due_date": { "type": "string", "format": "date" },
+              "status": { "type": "string", "enum": ["scheduled", "in_progress", "complete", "overdue", "skipped"] },
+              "owner": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "calendar_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "recurrence": { "type": "string", "enum": ["none", "daily", "weekly", "monthly", "quarterly", "annual"] },
+          "owner": { "type": "string" },
+          "pm_action_required": { "type": "boolean" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "flags": {
+      "type": "object",
+      "properties": {
+        "owner_needed": { "type": "array" },
+        "date_needed": { "type": "array" },
+        "inferred": { "type": "array" },
+        "unclear": { "type": "array" },
+        "conflicts": { "type": "array" },
+        "insufficient_data": { "type": "array" },
+        "one_way_door": { "type": "array" }
+      }
+    },
+    "next_run_recommendation": {
+      "type": "object",
+      "properties": {
+        "suggested_date": { "type": "string", "format": "date" },
+        "suggested_intent": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "vendor_output": {
+      "type": "object",
+      "description": "Optional. Third-party/vendor risk management output — vendor scorecards, remediation plans, TPRM assessments. Present when the program's monitoring cadence includes vendor risk tracking (e.g. 62443). Deliberately unstructured beyond object type — shape varies by program; do not force a common sub-schema until at least 2 programs' real usage has been compared.",
+      "additionalProperties": true
+    },
+    "monitoring_output": {
+      "type": "object",
+      "description": "Optional. Output of a monitoring_run pass that doesn't fit control_coverage/risk_register — decision queue, watch list, escalation items, draft communications staged for lead PM review. Present when a program runs recurring monitoring_run cycles between full_build passes (e.g. 62443).",
+      "additionalProperties": true
+    },
+    "program_extensions": {
+      "type": "object",
+      "description": "Optional. Namespaced container for genuinely program-specific top-level content that has no home in the shared schema (e.g. audit-team rosters, activity calendars, agentic-automation posture, dated lead_pm_ground_truth_*/lead_pm_status_* snapshot blocks). Key names inside this object are program-defined and not enumerated here by design — the point is to distinguish 'core schema, shared meaning' from 'program-specific extension' at the top level, so validate_schema_drift.py and future tooling can tell the difference instead of every extension looking like an undeclared core-schema key.",
+      "additionalProperties": true
+    }
+  }
+}

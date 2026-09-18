@@ -1,0 +1,29 @@
+---
+description: Requirements and constraints for building or modifying scripts and runtime tools in this repo.
+globs: scripts/**,runtime/**
+alwaysApply: false
+---
+
+## Tool Build Requirements
+
+Before writing any code in `scripts/` or `runtime/`, load `config/tool-requirements.md` in full.
+
+## Protected Files — Integrity Check Required
+
+Before modifying any of the following, run `python scripts/integrity_check.py`:
+- `config/constitution.md`
+- `engine/program-pipeline-orchestrator.md`
+- `engine/quality-gate-spec.md`
+
+If any headings are missing, restore them before proceeding. Notify the lead program manager.
+
+## Runtime Conventions
+
+- Scripts write to `logs/provenance.jsonl` via `scripts/provenance_log.py` — never directly
+- Trust level changes route through `runtime/trust.py`
+- Agent metrics route through `runtime/metrics.py`
+- Dynamic routing uses `runtime/router.py` — do not implement routing logic inline
+
+## Deployment Artifacts
+
+Kubernetes manifests live in `runtime/deploy/`. Do not modify without lead program manager approval — these are one-way door changes in deployed environments.

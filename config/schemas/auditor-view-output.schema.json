@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "auditor-view-output.schema.json",
+  "title": "Auditor View Output",
+  "description": "Structured shape of the read-only auditor compliance posture dashboard produced by functions/auditor-view-spec.md and rendered to static HTML by scripts/auditor_view_renderer.py. This is the data assembled in Pass 1-5 before HTML rendering — declaring it lets the renderer, a future JSON export, or another consumer validate the same shape instead of each inferring it ad hoc from run JSON fields.",
+  "type": "object",
+  "required": ["program", "report_date", "monitoring_activity", "control_coverage", "risk_register_summary", "evidence_calendar"],
+  "properties": {
+    "program": { "type": "string" },
+    "report_date": { "type": "string", "format": "date" },
+    "lookback_days": { "type": "integer" },
+    "staleness_notice": {
+      "type": ["string", "null"],
+      "description": "Present if latest.json is past next_run_recommendation."
+    },
+    "monitoring_activity": {
+      "type": "object",
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": { "type": "string", "format": "date-time" },
+              "spec": { "type": "string" },
+              "output_type": { "type": "string" },
+              "output_ref": { "type": "string" },
+              "quality_gate": { "type": "string", "enum": ["pass", "fail", "not_applicable"] }
+            }
+          }
+        },
+        "total_runs": { "type": "integer" },
+        "average_cadence_days": { "type": "number" },
+        "last_run_date": { "type": "string", "format": "date" },
+        "longest_gap_days": { "type": "integer" }
+      }
+    },
+    "control_coverage": {
+      "type": "object",
+      "properties": {
+        "total_controls": { "type": "integer" },
+        "evidenced": { "type": "integer" },
+        "implemented_no_evidence": { "type": "integer" },
+        "gap": { "type": "integer" },
+        "not_applicable": { "type": "integer" },
+        "coverage_pct": { "type": "number" },
+        "by_family": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "family": { "type": "string" },
+              "total": { "type": "integer" },
+              "evidenced": { "type": "integer" },
+              "implemented_no_evidence": { "type": "integer" },
+              "gap": { "type": "integer" },
+              "coverage_pct": { "type": "number" }
+            }
+          }
+        },
+        "unavailable": { "type": "boolean", "default": false }
+      }
+    },
+    "risk_register_summary": {
+      "type": "object",
+      "properties": {
+        "total_open": { "type": "integer" },
+        "by_severity": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+              "open": { "type": "integer" },
+              "closed_period": { "type": "integer" },
+              "overdue_poam": { "type": "integer" }
+            }
+          }
+        },
+        "closure_rate_pct": { "type": "number" },
+        "unavailable": { "type": "boolean", "default": false }
+      }
+    },
+    "evidence_calendar": {
+      "type": "object",
+      "properties": {
+        "upcoming": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/calendar_window" }
+        },
+        "completed": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/calendar_window" }
+        },
+        "completion_rate_pct": { "type": "number" },
+        "upcoming_in_30_days": { "type": "integer" },
+        "unavailable": { "type": "boolean", "default": false }
+      }
+    }
+  },
+  "$defs": {
+    "calendar_window": {
+      "type": "object",
+      "properties": {
+        "window": { "type": "string" },
+        "controls_or_items": { "type": "array", "items": { "type": "string" } },
+        "date": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["scheduled", "in_progress", "complete", "overdue", "skipped"] }
+      }
+    }
+  }
+}

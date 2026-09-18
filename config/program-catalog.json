@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "programs": [
+    {
+      "_comment": "Add one entry per compliance program. Copy this block and fill in your values.",
+      "program_slug": "your-program-slug",
+      "status": "active",
+      "data_path": "data/your-program-slug",
+      "runs_path": "runs/your-program-slug",
+      "memory_path": "memory/your-program-slug-memory.md"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+---
+description: Boot sequence and lazy-load routing table. Always active.
+alwaysApply: true
+---
+
+## Boot Sequence
+
+On every session start:
+1. Load `config/constitution.md` — governs everything
+2. Run: `ls engine/ functions/ agents/ scripts/ config/` — live capability inventory
+3. Run: `ls runs/ memory/` — know what programs and state files exist
+4. Classify the input — then load only what the request requires
+
+Do NOT pre-load specs, memory files, or run JSONs before classification.
+Load program memory and run JSON only for the program the request is about.
+Load `engine/session-init-spec.md` only when orientation or routing is needed.
+
+## Lazy Loading Rules
+
+| Request type | Load |
+|---|---|
+| Program-scoped | `memory/[program]-memory.md` + `runs/[program]/latest.json` + routed spec only |
+| Portfolio / cross-program | `data/portfolio/latest.json` + all memory + all run JSONs + portfolio orchestrator |
+| No program identified | Ask one clarifying question — load nothing else yet |
+| Orientation requested | `engine/session-init-spec.md` + `data/portfolio/latest.json` + `tail logs/provenance.jsonl` |
+| Tool build | `config/tool-requirements.md` before writing any code |
+
+## Routing Authority
+
+Full routing table and input processing logic: `engine/session-init-spec.md`
+Load it when routing is needed — not at boot.

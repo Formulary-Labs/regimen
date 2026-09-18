@@ -1,0 +1,8 @@
+---
+description: Core agent identity, constitution reference, and behavioral mandates — single source of truth. See CLAUDE.md for full content.
+alwaysApply: true
+---
+
+This file is a reference stub only. All identity, core rules, flag vocabulary, and behavioral mandates are canonically defined in `CLAUDE.md` at the repository root.
+
+See: `CLAUDE.md` (§ "Identity and Core Rules" + "Flag Vocabulary")

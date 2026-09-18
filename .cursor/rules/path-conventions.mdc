@@ -1,0 +1,57 @@
+---
+description: Path conventions and flag vocabulary for working with memory, runs, and logs files.
+globs: memory/**,runs/**,logs/**,data/**,drafts/**
+alwaysApply: false
+---
+
+## Path Conventions
+
+All spec and file references use these prefixes — never a leading `/`:
+
+| Prefix | Purpose |
+|---|---|
+| `config/` | Constitution, schemas, program catalog, tool requirements |
+| `engine/` | Orchestrator specs, quality gate, session init |
+| `functions/` | Function-level specs (monitoring, intake, vendor, comms, etc.) |
+| `agents/` | Agent definitions (coordinator, program, intelligence, review, evidence) |
+| `scripts/` | Python utility scripts (provenance, integrity check, etc.) |
+| `memory/` | Program memory files, decision logs, archives |
+| `runs/` | Pipeline run JSONs (latest.json + dated history) |
+| `data/` | Portfolio state, intel scan results, program materials, checkpoints |
+| `logs/` | Provenance log, audit trail |
+| `drafts/` | Staged communications awaiting review |
+
+## Memory File Naming
+
+| File | Purpose |
+|---|---|
+| `memory/[program]-memory.md` | Hot layer — loaded every session |
+| `memory/[program]-decisions.log` | Append-only decision log |
+| `memory/[program]-archive.md` | Historical context — load only on demand |
+| `memory/[program]-wip.md` | In-progress session notes — written during session, cleared at successful close; presence indicates a prior session may have crashed |
+
+## Workflow State vs Conversation State
+
+These are two distinct layers. Never mix them.
+
+| Layer | Definition | Lives in |
+|---|---|---|
+| Workflow state | Any data that drives a future pipeline decision, routing choice, or compliance output | `runs/`, `data/`, `memory/[program]-decisions.log`, `data/[program]/checkpoints/` |
+| Conversation state | Narrative summary of what happened in a session — context for the lead program manager, not for the pipeline | `memory/[program]-memory.md` session entries only |
+
+Rules:
+- Decisions, accepted risks, scope changes, and flag resolutions are workflow state — write them to `memory/[program]-decisions.log` AND reference them in session memory.
+- Session memory entries may link to workflow state but must never be the sole record of it.
+- Renderers and orchestrators read workflow state only. They do not read `memory/[program]-memory.md`.
+- If unsure which layer an item belongs to: ask "would a future pipeline run need this to produce a correct output?" If yes → workflow state. If no → conversation state.
+
+## Run File Naming
+
+| File | Purpose |
+|---|---|
+| `runs/[program]/latest.json` | Current program state (overwritten each run) |
+| `runs/[program]/[date]-run.json` | Dated run history |
+| `runs/[program]/draft-run.json` | WIP pipeline envelope — incomplete until promoted to `latest.json` |
+| `data/[program]/checkpoints/[id].json` | Generic resumability checkpoint (see `engine/crash-resilience-spec.md`) |
+| `data/[program]/assessments/[RUN_ID]-state.json` | Control assessment batch state (see `functions/control-assessment-spec.md`) |
+| `data/[program]/kanban.yaml` | Jira-aligned kanban board — source of truth for task tracking; dashboards read from it, never write to it (see `functions/kanban-spec.md`, schema: `config/schemas/kanban.schema.json`) |
