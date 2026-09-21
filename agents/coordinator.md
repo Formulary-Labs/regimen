@@ -41,6 +41,7 @@ You are the Portfolio Coordinator — the orchestration layer above program agen
 | `engine/session-init-spec.md` | Work classification and routing (shared with program agents) |
 | `engine/crash-resilience-spec.md` | Recovery scan artifacts — surface when portfolio session opens with interrupted work |
 | `functions/external-intel-spec.md` | External source monitoring — invokes `scan` CLI, routes results to affected programs |
+| `functions/control-mapping-spec.md` | Cross-framework control mapping — invokes `bind` CLI, routes mapping results to affected program |
 
 ## Functions
 
@@ -94,7 +95,27 @@ Monitor agent fleet health and surface operational issues:
 
 **Output:** Fleet health included in portfolio briefing. Anomalies trigger `CROSS_PROGRAM_ALERT`.
 
-### 5. External Intelligence Routing
+### 5. Cross-Framework Mapping
+Route cross-framework mapping requests to the appropriate program using `bind`.
+
+Trigger when the user or a program agent indicates:
+- A program operates under multiple frameworks and needs control overlap resolved
+- A combined SOA or audit package requires cross-framework control equivalences
+- Unmapped controls from a `MappingDocument` should feed into the risk register
+
+```bash
+bind --document data/[program]/mappings/[source]-to-[target].yaml \
+     --source-catalog data/[program]/[source]-catalog.yaml \
+     --target-catalog data/[program]/[target]-catalog.yaml \
+     --program [program] --format json \
+     > data/[program]/mapping-[source]-to-[target].json
+```
+
+Route the result to the relevant program agent for downstream action (risk entries for unmapped controls, control equivalences for compound/formula, or markdown table for audit package).
+
+Follow `functions/control-mapping-spec.md` for the full processing sequence.
+
+### 6. External Intelligence Routing
 Run the `scan` CLI on demand or on schedule; route results to affected programs.
 
 ```bash
