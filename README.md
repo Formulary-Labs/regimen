@@ -11,7 +11,7 @@ Part of the [Formulary-Labs](https://github.com/Formulary-Labs) ecosystem.
 Regimen is the AI agent layer above Formulary's deterministic CLI tools. It handles:
 
 - **Program intake and monitoring** — classifies incoming work, routes to the right spec, and maintains program state across sessions
-- **Orchestration** — invokes Formulary CLIs (`assay`, `titer`, `specimen`, `dose`, `exhibit`, `challenge`, `decay`, `scan`, `compound`, `formula`) for all computation-heavy work, then synthesizes their structured output into decisions and communications
+- **Orchestration** — when a matching Formulary CLI is installed, prefers it for computation-heavy work and synthesizes the structured output into decisions and communications; executes via function specs when CLIs are not available
 - **Memory management** — maintains per-program hot memory, decision logs, and workflow state across sessions
 - **Quality gate** — every output passes `engine/quality-gate-spec.md` before delivery
 - **Portfolio view** — cross-program health, QBR synthesis, and shared risk patterns
@@ -30,11 +30,11 @@ Lead Program Manager
    │  (agent) │  ◄── engine/ (orchestrators, quality gate)
    │          │  ◄── functions/ (19 function specs)
    └────┬─────┘
-        │  structured invocation
+        │  structured invocation (when CLIs installed)
         ▼
-   Formulary CLI tools
+   Formulary CLI tools — optional; any subset
    (assay · titer · specimen · dose · exhibit · challenge
-    decay · scan · compound · formula · probe)
+    decay · scan · compound · formula · probe · bind)
         │
         ▼
    gemara artifacts  ·  run JSON  ·  provenance log
@@ -44,24 +44,11 @@ The split is explicit: Formulary tools handle anything that can be reduced to a 
 
 ---
 
-## Prerequisites
+## Setup
 
-**Formulary CLI tools** — install from [github.com/Formulary-Labs](https://github.com/Formulary-Labs):
+### Required
 
-```bash
-# Each tool is a standalone Go binary — install whichever you need
-go install github.com/Formulary-Labs/assay/cmd/assay@latest
-go install github.com/Formulary-Labs/titer/cmd/titer@latest
-go install github.com/Formulary-Labs/specimen/cmd/specimen@latest
-go install github.com/Formulary-Labs/dose/cmd/dose@latest
-go install github.com/Formulary-Labs/exhibit/cmd/exhibit@latest
-go install github.com/Formulary-Labs/challenge/cmd/challenge@latest
-go install github.com/Formulary-Labs/decay/cmd/decay@latest
-go install github.com/Formulary-Labs/scan/cmd/scan@latest
-go install github.com/Formulary-Labs/compound/cmd/compound@latest
-go install github.com/Formulary-Labs/formula/cmd/formula@latest
-go install github.com/Formulary-Labs/probe/cmd/probe@latest
-```
+**Cursor or Claude Code** — this framework is designed for use with an AI coding agent that can read the repo structure, invoke slash commands, and run scripts.
 
 **Python 3.10+** — for provenance logging, validation scripts, and HTML renderers:
 
@@ -69,7 +56,19 @@ go install github.com/Formulary-Labs/probe/cmd/probe@latest
 pip install -r runtime/requirements.txt
 ```
 
-**Cursor or Claude Code** — this framework is designed for use with an AI coding agent that can read the repo structure, invoke slash commands, and run scripts.
+### Optional Formulary CLIs
+
+Regimen works without any Formulary CLI installed — the function specs contain enough guidance to execute manually. When a CLI is available for a function, regimen prefers it for deterministic work. Install only the tools you use:
+
+```bash
+# Example — install only what your workflow needs
+go install github.com/Formulary-Labs/probe/cmd/probe@latest
+go install github.com/Formulary-Labs/assay/cmd/assay@latest
+go install github.com/Formulary-Labs/titer/cmd/titer@latest
+go install github.com/Formulary-Labs/bind/cmd/bind@latest   # cross-framework mapping
+```
+
+See [FORMULARY.md](./FORMULARY.md) for the full spec → CLI map and install commands for every tool.
 
 ---
 

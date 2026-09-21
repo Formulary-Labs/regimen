@@ -8,7 +8,9 @@ governed_by: config/constitution.md
 # Formulary — Compliance Micro-Tools Ecosystem
 
 **Organization:** [github.com/Formulary-Labs](https://github.com/Formulary-Labs)
-**Purpose:** Open-source Go CLI tools that implement the deterministic execution layer for functions defined in this repo. Each tool is AI-optional (runs standalone or in CI) and AI-beneficial (produces structured output that reduces agent token overhead and increases determinism).
+**Purpose:** Open-source Go CLI tools that implement the deterministic execution layer for functions defined in this repo. Each tool is independently useful — run one alone, pipe a few together, or skip any tool entirely. No Formulary CLI is required for regimen to function.
+
+> **Optionality:** Every Formulary binary is independent. When a CLI is installed and a matching function spec exists, regimen prefers it for deterministic work. When a CLI is not installed, the function spec provides enough guidance to execute manually. Install only the tools your workflow uses.
 
 ---
 
@@ -45,6 +47,7 @@ Formulary-Labs org (github.com/Formulary-Labs)
 | `functions/compliance-redteam-spec.md` | `challenge` | [Formulary-Labs/challenge](https://github.com/Formulary-Labs/challenge) | 10-pattern deterministic artifact interrogation | SME judgment, severity classification, reviewer guidance |
 | `functions/control-assessment-spec.md` | `assay` | [Formulary-Labs/assay](https://github.com/Formulary-Labs/assay) | Resumable batch control assessment with 7-criterion validation and state management | Narrative response generation, quality gate, gap review |
 | `functions/control-coverage-spec.md` | `titer` | [Formulary-Labs/titer](https://github.com/Formulary-Labs/titer) | Coverage matrix, gap analysis (coverage/owner/evidence), SOA CSV from gemara Layer 2 | Framework interpretation, control narrative, pipeline writes |
+| `functions/control-mapping-spec.md` | `bind` | [Formulary-Labs/bind](https://github.com/Formulary-Labs/bind) | Cross-framework MappingDocument resolution — mapped/unmapped entries, title resolution, conflict flags | Routing to downstream specs (risk register, compound, audit package) |
 | `functions/external-intel-spec.md` | `scan` | [Formulary-Labs/scan](https://github.com/Formulary-Labs/scan) | External source fetch (CISA, NVD, RSS), relevance scoring, structured output | Source judgment, risk delta narrative, stakeholder draft routing |
 | `functions/management-system-assembler-spec.md` | `compound` | [Formulary-Labs/compound](https://github.com/Formulary-Labs/compound) | Annex SL-structured ISMS/AIMS/CSMS document scaffold with deterministic clause population | Narrative generation (marked `[DATA NEEDED: narrative]`), quality gate, review |
 | `functions/program-dashboard-spec.md` | `vital` | [Formulary-Labs/vital](https://github.com/Formulary-Labs/vital) | Program health snapshot JSON/Markdown from run state, coverage, risk data | Full HTML render (renderers still active), portfolio aggregation |
@@ -117,7 +120,9 @@ See [complytime-integration-design.md](https://github.com/Formulary-Labs/.github
 
 ---
 
-## Quick Install
+## Optional Installs
+
+Each binary is independent — install only the tools your workflow uses:
 
 ```bash
 go install github.com/Formulary-Labs/probe/cmd/probe@latest
@@ -131,4 +136,5 @@ go install github.com/Formulary-Labs/decay/cmd/decay@latest
 go install github.com/Formulary-Labs/scan/cmd/scan@latest
 go install github.com/Formulary-Labs/compound/cmd/compound@latest
 go install github.com/Formulary-Labs/formula/cmd/formula@latest
+go install github.com/Formulary-Labs/bind/cmd/bind@latest
 ```
